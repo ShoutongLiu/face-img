@@ -42,8 +42,8 @@ import {
 import { message } from "ant-design-vue";
 
 const bgImage1 = "http://129.28.191.47/face/fight.png";
-// const bgImage2 = "http://129.28.191.47/face/hongbao1.png";
-const bgImage2 = "http://localhost:3000/face/hongbao1.png";
+const bgImage2 = "http://129.28.191.47/face/hongbao1.png";
+// const bgImage2 = "http://localhost:3000/face/hongbao1.png";
 const bgImage3 = "http://129.28.191.47/face/hongbao2.png";
 // defineProps<{ msg: string }>()
 
@@ -135,6 +135,11 @@ const convertImageToCanvas = (image) => {
 };
 
 const downloadImg = () => {
+  console.log(downloadUrl.value);
+  if (!downloadUrl.value) {
+    message.warning("没有图片可以下载！");
+    return;
+  }
   const url = downloadUrl.value; // 获取图片地址
   const a = document.createElement("a"); // 创建一个a节点插入的document
   const event = new MouseEvent("click"); // 模拟鼠标click点击事件
