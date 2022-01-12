@@ -1,12 +1,14 @@
 export const imgs = {
-  bgImage1: 'http://192.168.3.25:3000/face/hongbao1.png',
-  bgImage2: 'http://192.168.3.25:3000/face/hongbao2.png',
-  bgImage3: 'http://192.168.3.25:3000/face/hongbao3.png',
-  bgImage4: 'http://192.168.3.25:3000/face/hongbao4.png',
-  bgImage5: 'http://192.168.3.25:3000/face/hongbao5.png',
-  bgImage6: 'http://192.168.3.25:3000/face/hongbao6.png',
-  bgImage7: 'http://192.168.3.25:3000/face/hongbao7.png',
-  bgImage8: 'http://192.168.3.25:3000/face/hongbao8.png',
+  bgImage1: 'http://192.168.3.25:8888/face/hongbao1.png',
+  bgImage2: 'http://192.168.3.25:8888/face/hongbao2.png',
+  bgImage3: 'http://192.168.3.25:8888/face/hongbao3.png',
+  bgImage4: 'http://192.168.3.25:8888/face/hongbao4.png',
+  bgImage5: 'http://192.168.3.25:8888/face/hongbao5.png',
+  bgImage6: 'http://192.168.3.25:8888/face/hongbao6.png',
+  bgImage7: 'http://192.168.3.25:8888/face/hongbao7.png',
+  bgImage8: 'http://192.168.3.25:8888/face/hongbao8.png',
+  bgImage9: 'http://192.168.3.25:8888/face/hongbao9.png',
+  bgImage10: 'http://192.168.3.25:8888/face/hongbao10.png',
 };
 
 export const location = {
@@ -57,5 +59,17 @@ export const location = {
     top: 80,
     width: 200,
     height: 180
+  },
+  bgImage9: {
+    left: 185,
+    top: 20,
+    width: 110,
+    height: 110
+  },
+  bgImage10: {
+    left: 100,
+    top: 60,
+    width: 90,
+    height: 90
   }
 }

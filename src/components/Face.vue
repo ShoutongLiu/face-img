@@ -105,7 +105,7 @@ const convertCanvasToImage = (canvas) => {
   const url = canvas.toDataURL('image/png');
   image.src = url;
   canvasImg.value = image;
-  convertImageToCanvas(imgs.bgImage6, image, location.bgImage6);
+  convertImageToCanvas(imgs.bgImage1, image, location.bgImage1);
 };
 
 const downloadUrl = ref('');
@@ -162,7 +162,7 @@ const imgChange = () => {
     return;
   }
   count.value += 1;
-  if (count.value > 8) {
+  if (count.value > 10) {
     count.value = 1
   }
   console.log(count.value);
