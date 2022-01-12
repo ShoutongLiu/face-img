@@ -9,19 +9,21 @@
         @change="handleChange"
       >
         <a-button>
-          <upload-outlined></upload-outlined>
-          点击上传
+          <upload-outlined></upload-outlined>点击上传
         </a-button>
       </a-upload>
-      <img :src="imgUrl" id="inputImg" class="priview" alt="" />
+      <img :src="imgUrl" id="inputImg" class="priview" alt />
       <div class="face">
         <div id="facesContainer"></div>
       </div>
     </div>
 
     <div class="download">
-      <div id="mergeImg"></div>
-      <a-button class="down-btn" type="primary" @click="downloadImg">下载图片</a-button>
+      <div class="btn-group">
+        <a-button class="down-btn" type="primary" @click="downloadImg">下载图片</a-button>
+        <a-button class="down-btn" type="primary" @click="imgChange">换个样式</a-button>
+      </div>
+      <img :src="mergeUrl" class="mergeImg" alt :width="mergeWidth" :height="mergeHeight" />
     </div>
   </div>
   <!-- <img :src="downloadUrl" alt="" /> -->
@@ -31,27 +33,25 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from "vue";
-import * as faceapi from "face-api.js";
-import { UploadOutlined } from "@ant-design/icons-vue";
+import { ref, onMounted } from 'vue';
+import * as faceapi from 'face-api.js';
+import { UploadOutlined } from '@ant-design/icons-vue';
 import {
   isFaceDetectionModelLoaded,
   getCurrentFaceDetectionNet,
   getFaceDetectorOptions,
-} from "../utils/faceContoals";
-import { message } from "ant-design-vue";
+} from '../utils/faceContoals';
+import { message } from 'ant-design-vue';
+import { imgs, location } from '../utils/imgsData'
 
-const bgImage1 = "http://129.28.191.47/face/fight.png";
-const bgImage2 = "http://129.28.191.47/face/hongbao1.png";
-// const bgImage2 = "http://localhost:3000/face/hongbao1.png";
-const bgImage3 = "http://129.28.191.47/face/hongbao2.png";
 // defineProps<{ msg: string }>()
 
-const imgUrl = ref("");
+const imgUrl = ref('');
+const mergeUrl = ref('');
 const isUpload = ref(false);
 
 onMounted(() => {
-  // ! 初始化，加载人脸模型
+  // ! 初始化，加载人脸识别模型
   if (!isFaceDetectionModelLoaded()) {
     getCurrentFaceDetectionNet().load();
   }
@@ -75,81 +75,104 @@ const updateResults = async () => {
   if (!isFace) {
     return;
   }
-  const inputImgEl = document.getElementById("inputImg");
-  console.log(inputImgEl, "inputImgEl");
+  const inputImgEl = document.getElementById('inputImg');
   const options = getFaceDetectorOptions();
-
   const detections = await faceapi.detectAllFaces(inputImgEl, options);
+  // * 得到人脸数据（数组）
   const faceImages = await faceapi.extractFaces(inputImgEl, detections);
-  console.log(faceImages, "faceImages");
+
   if (faceImages.length > 0) {
     displayExtractedFaces(faceImages);
   } else {
-    message.warning("识别不到人脸");
+    message.warning('识别不到人脸');
+    facesContainer.innerHTML = '';
+    mergeUrl.value = '';
   }
 };
 
 // * 渲染获取的人脸图片
 const displayExtractedFaces = (faceImages) => {
-  const facesContainer = document.getElementById("facesContainer");
-  facesContainer.innerHTML = "";
+  const facesContainer = document.getElementById('facesContainer');
+  facesContainer.innerHTML = '';
   faceImages.forEach((canvas) => facesContainer.append(canvas));
   convertCanvasToImage(faceImages[0]);
 };
 
+const canvasImg = ref('');
 // * canvas转img
 const convertCanvasToImage = (canvas) => {
   const image = new Image();
-  image.src = canvas.toDataURL("image/png");
-  convertImageToCanvas(image);
+  const url = canvas.toDataURL('image/png');
+  image.src = url;
+  canvasImg.value = image;
+  convertImageToCanvas(imgs.bgImage6, image, location.bgImage6);
 };
 
-const downloadUrl = ref("");
+const downloadUrl = ref('');
+const mergeWidth = ref(0);
+const mergeHeight = ref(0);
 
 // * img转canvas
-const convertImageToCanvas = (image) => {
-  // ! 创建画布
-  const canvas = document.createElement("canvas");
+const convertImageToCanvas = (bg, image, lac) => {
+  // * 创建画布
+  const canvas = document.createElement('canvas');
 
-  // ! 创建背景图
+  // * 创建背景图
   const bgImg = new Image();
-  bgImg.src = bgImage2;
-  bgImg.crossOrigin = "Anonymous";
+  bgImg.src = bg;
+  bgImg.crossOrigin = 'Anonymous';
 
   bgImg.onload = () => {
     const width = bgImg.width;
     const height = bgImg.height;
-    // ! 按照背景图的宽高设置画布宽高
+    // * 按照背景图的宽高设置画布宽高
     canvas.width = width;
     canvas.height = height;
-    // ! 把图片放入画布中
-    canvas.getContext("2d").drawImage(bgImg, 0, 0, width, height);
-    canvas.getContext("2d").drawImage(image, 180, 80, 200, 200);
+    // ! 把图片放入画布中, 先放背景图，再放人脸，防止覆盖
+    canvas.getContext('2d').drawImage(bgImg, 0, 0, width, height);
+    canvas.getContext('2d').drawImage(image, lac.left, lac.top, lac.width, lac.height);
     console.log(canvas);
-    const merge = document.getElementById("mergeImg");
-    merge.innerHTML = "";
-    merge.append(canvas);
-    //! 生成图片url下载
-    downloadUrl.value = canvas.toDataURL("image/gif");
+    const url = canvas.toDataURL('image/png');
+    mergeWidth.value = width;
+    mergeHeight.value = height;
+    mergeUrl.value = url;
+    //* 生成图片url下载
+    downloadUrl.value = url;
   };
 };
 
 const downloadImg = () => {
   console.log(downloadUrl.value);
   if (!downloadUrl.value) {
-    message.warning("没有图片可以下载！");
+    message.warning('没有图片可以下载！');
     return;
   }
-  const url = downloadUrl.value; // 获取图片地址
-  const a = document.createElement("a"); // 创建一个a节点插入的document
-  const event = new MouseEvent("click"); // 模拟鼠标click点击事件
-  a.download = "happy"; // 设置a节点的download属性值
-  a.href = url; // 将图片的src赋值给a节点的href
-  a.dispatchEvent(event); // 触发鼠标点击事件
+  const url = downloadUrl.value; //* 获取图片地址
+  const a = document.createElement('a'); //* 创建一个a节点插入的document
+  const event = new MouseEvent('click'); //* 模拟鼠标click点击事件
+  a.download = 'happy-newyear'; //* 设置a节点的download属性值
+  a.href = url; //* 将图片的src赋值给a节点的href
+  a.dispatchEvent(event); //* 触发鼠标点击事件
+};
+
+const count = ref(1);
+const imgChange = () => {
+  if (!downloadUrl.value) {
+    message.warning('请先上传图片');
+    return;
+  }
+  count.value += 1;
+  if (count.value > 8) {
+    count.value = 1
+  }
+  console.log(count.value);
+  const imgName = `bgImage${count.value}`;
+  convertImageToCanvas(imgs[imgName], canvasImg.value, location[imgName])
 };
 </script>
 
 <style scoped>
+/* 移动端样式 */
 @media screen and (max-width: 1024px) {
   .container {
     display: flex;
@@ -171,6 +194,21 @@ const downloadImg = () => {
 
   .download {
     display: flex;
+    flex-direction: column;
+  }
+
+  .download .down-btn {
+    height: 40px;
+    margin-top: 20px;
+  }
+
+  .btn-group {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .mergeImg {
+    width: 100%;
   }
 
   #facesContainer {
@@ -188,6 +226,8 @@ const downloadImg = () => {
     left: 0;
   }
 }
+
+/* pc端样式 */
 
 @media screen and (min-width: 1024px) {
   .container {
@@ -212,7 +252,22 @@ const downloadImg = () => {
     display: flex;
   }
 
+  .btn-group {
+    display: flex;
+    flex-direction: column;
+  }
+
   .download .down-btn {
+    width: 120px;
+    height: 32px;
+    margin-left: 30px;
+  }
+
+  .download .down-btn:last-child {
+    margin-top: 20px;
+  }
+
+  .mergeImg {
     margin-left: 30px;
   }
 
